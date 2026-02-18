@@ -2,156 +2,199 @@
 #include "doctest.h"
 #include "List.h"
 
-TEST_CASE("Single element list - tail points to itself") {
+using namespace std;
+
+TEST_CASE("Test 1: Empty LinkedList creation") {
     LinkedList list;
-    list.insert(42);
-    
-    REQUIRE(list.getHead() != nullptr);
-    REQUIRE(list.getTail() != nullptr);
-    REQUIRE(list.getHead() == list.getTail());
-    REQUIRE(list.getHead()->next == list.getHead());
-    REQUIRE(list.getSize() == 1);
+    CHECK(list.getSize() == 0);
+    CHECK(list.getFirstElement() == nullptr);
+    CHECK(list.getLastElement() == nullptr);
 }
 
-TEST_CASE("Multiple elements - tail points to itself in circular list") {
+TEST_CASE("Test 2: Insert at beginning") {
     LinkedList list;
-    list.insert(1);
-    list.insert(2);
-    list.insert(3);
+    list.insertAtBeginning(10);
+    list.insertAtBeginning(20);
+    list.insertAtBeginning(30);
     
-    REQUIRE(list.getSize() == 3);
-    REQUIRE(list.getTail()->next == list.getTail());
-    REQUIRE(list.getHead()->data == 3);
-    REQUIRE(list.getTail()->data == 1);
+    CHECK(list.getSize() == 3);
+    CHECK(list.getValueAt(0) == 30);
+    CHECK(list.getValueAt(1) == 20);
+    CHECK(list.getValueAt(2) == 10);
 }
 
-TEST_CASE("Delete function removes ith node correctly") {
+TEST_CASE("Test 3: Insert at end") {
     LinkedList list;
-    list.insert(10);
-    list.insert(20);
-    list.insert(30);
+    list.insertAtEnd(10);
+    list.insertAtEnd(20);
+    list.insertAtEnd(30);
     
-    list.deleteAtPosition(1); 
-    
-    REQUIRE(list.getSize() == 2);
-    REQUIRE(list.getHead()->data == 30);
-    REQUIRE(list.getHead()->next->data == 10);
-    REQUIRE(list.getTail()->data == 10);
+    CHECK(list.getSize() == 3);
+    CHECK(list.getValueAt(0) == 10);
+    CHECK(list.getValueAt(1) == 20);
+    CHECK(list.getValueAt(2) == 30);
 }
 
-TEST_CASE("Delete head node") {
+TEST_CASE("Test 4: Delete node at various positions") {
     LinkedList list;
-    list.insert(1);
-    list.insert(2);
-    list.insert(3);
+    list.insertAtEnd(10);
+    list.insertAtEnd(20);
+    list.insertAtEnd(30);
+    list.insertAtEnd(40);
+    list.insertAtEnd(50);
     
-    list.deleteAtPosition(0);  
+
+    list.deleteNodeNumber(2);
+    CHECK(list.getSize() == 4);
+    CHECK(list.getValueAt(2) == 40);
     
-    REQUIRE(list.getSize() == 2);
-    REQUIRE(list.getHead()->data == 2);
-    REQUIRE(list.getTail()->data == 1);
+    list.deleteNodeNumber(0);
+    CHECK(list.getSize() == 3);
+    CHECK(list.getValueAt(0) == 20);
+    
+    list.deleteNodeNumber(2);
+    CHECK(list.getSize() == 2);
+    CHECK(list.getValueAt(1) == 40);
 }
 
-TEST_CASE("Delete tail node") {
-    LinkedList list;
-    list.insert(1);
-    list.insert(2);
-    list.insert(3);
-    
-    list.deleteAtPosition(2);
-    
-    REQUIRE(list.getSize() == 2);
-    REQUIRE(list.getTail()->data == 2);
-    REQUIRE(list.getTail()->next == list.getTail());
-}
-
-TEST_CASE("Copy constructor - creates independent list") {
+TEST_CASE("Test 5: Copy constructor") {
     LinkedList list1;
-    list1.insert(10);
-    list1.insert(20);
-    list1.insert(30);
+    list1.insertAtEnd(1);
+    list1.insertAtEnd(2);
+    list1.insertAtEnd(3);
+    list1.insertAtEnd(4);
     
-    LinkedList list2 = list1;
+    LinkedList list2(list1);
     
-    REQUIRE(list2.getSize() == list1.getSize());
-    REQUIRE(list2.getHead()->data == list1.getHead()->data);
-    REQUIRE(list2.getTail()->data == list1.getTail()->data);
+    CHECK(list2.getSize() == 4);
+    CHECK(list2.getValueAt(0) == 1);
+    CHECK(list2.getValueAt(1) == 2);
+    CHECK(list2.getValueAt(2) == 3);
+    CHECK(list2.getValueAt(3) == 4);
     
-    list1.deleteAtPosition(0);
-    REQUIRE(list2.getSize() == 3);
-    REQUIRE(list1.getSize() == 2);
+    list1.insertAtEnd(5);
+    CHECK(list1.getSize() == 5);
+    CHECK(list2.getSize() == 4);
 }
 
-TEST_CASE("Positive prefix sum - all running sums are positive") {
+TEST_CASE("Test 6: Positive prefix sum - all positive") {
     LinkedList list;
-    list.insert(5);
-    list.insert(3);
-    list.insert(2);
-
-    REQUIRE(list.isPositivePrefixSum() == true);
-    REQUIRE(list.isNegativePrefixSum() == false);
-}
-
-TEST_CASE("Negative prefix sum - all running sums are negative") {
-    LinkedList list;
-    list.insert(-1);
-    list.insert(-2);
-    list.insert(-3);
+    list.insertAtEnd(5);
+    list.insertAtEnd(3);
+    list.insertAtEnd(2);
+    list.insertAtEnd(1);
     
-    REQUIRE(list.isNegativePrefixSum() == true);
-    REQUIRE(list.isPositivePrefixSum() == false);
+    CHECK(list.isPositivePrefixSum() == true);
+    CHECK(list.isNegativePrefixSum() == false);
 }
 
-TEST_CASE("Mixed prefix sum - neither all positive nor all negative") {
+TEST_CASE("Test 7: Positive prefix sum - contains negative leading to non-positive sum") {
     LinkedList list;
-    list.insert(1);
-    list.insert(-3);
-    list.insert(2);
+    list.insertAtEnd(5);
+    list.insertAtEnd(-3);
+    list.insertAtEnd(-4);
     
-    REQUIRE(list.isPositivePrefixSum() == false);
-    REQUIRE(list.isNegativePrefixSum() == false);
+    CHECK(list.isPositivePrefixSum() == false);
 }
 
-TEST_CASE("Pointer jumping algorithm - all elements point to tail") {
+TEST_CASE("Test 8: Negative prefix sum - all negative") {
     LinkedList list;
-    list.insert(1);
-    list.insert(2);
-    list.insert(3);
-    list.insert(4);
-    list.insert(5);
+    list.insertAtEnd(-5);
+    list.insertAtEnd(-3);
+    list.insertAtEnd(-2);
+    list.insertAtEnd(-1);
+    
+    CHECK(list.isNegativePrefixSum() == true);
+    CHECK(list.isPositivePrefixSum() == false);
+}
+
+TEST_CASE("Test 9: Negative prefix sum - contains positive") {
+    LinkedList list;
+    list.insertAtEnd(-5);
+    list.insertAtEnd(3);
+    list.insertAtEnd(-1);
+    
+    CHECK(list.isNegativePrefixSum() == true);
+    
+    list.insertAtEnd(10);
+    CHECK(list.isNegativePrefixSum() == false);
+}
+
+TEST_CASE("Test 10: Pointer jumping algorithm") {
+    LinkedList list;
+    list.insertAtEnd(1);
+    list.insertAtEnd(2);
+    list.insertAtEnd(3);
+    list.insertAtEnd(4);
+    list.insertAtEnd(5);
     
     list.performPointerJumping();
     
-    Node* temp = list.getHead();
-    while (temp != nullptr) {
-        CHECK(temp->jump == list.getTail());
-        if (temp == list.getTail()) break;
-        temp = temp->next;
+    CHECK(list.getSize() == 5);
+    CHECK(list.getValueAt(0) == 1);
+    CHECK(list.getValueAt(1) == 2);
+    CHECK(list.getValueAt(2) == 3);
+    CHECK(list.getValueAt(3) == 4);
+    CHECK(list.getValueAt(4) == 5);
+    
+    Node* first = list.getFirstElement();
+    CHECK(first != nullptr);
+    CHECK(first->jump != nullptr);
+}
+
+TEST_CASE("Test 11: Mixed operations") {
+    LinkedList list;
+    
+    list.insertAtEnd(10);
+    list.insertAtEnd(20);
+    list.insertAtEnd(30);
+    CHECK(list.getSize() == 3);
+    
+    list.insertAtBeginning(5);
+    CHECK(list.getSize() == 4);
+    CHECK(list.getValueAt(0) == 5);
+    
+    list.deleteNodeNumber(1);
+    CHECK(list.getSize() == 3);
+    CHECK(list.getValueAt(1) == 20);
+
+    CHECK(list.isPositivePrefixSum() == true);
+}
+
+TEST_CASE("Test 12: Edge cases and boundary conditions") {
+    LinkedList list;
+    
+    SUBCASE("Empty list operations") {
+        CHECK(list.getSize() == 0);
+        CHECK(list.getValueAt(0) == -1);
+        CHECK(list.isPositivePrefixSum() == true);
+        CHECK(list.isNegativePrefixSum() == true);
+        list.deleteNodeNumber(0); 
+        CHECK(list.getSize() == 0);
     }
-}
-
-TEST_CASE("Pointer jumping with two elements") {
-    LinkedList list;
-    list.insert(1);
-    list.insert(2);
     
-    list.performPointerJumping();
+    SUBCASE("Single element list") {
+        list.insertAtEnd(42);
+        CHECK(list.getSize() == 1);
+        CHECK(list.getValueAt(0) == 42);
+        CHECK(list.getFirstElement() == list.getLastElement());
+        
+        list.deleteNodeNumber(0);
+        CHECK(list.getSize() == 0);
+    }
     
-    REQUIRE(list.getHead()->jump == list.getTail());
-    REQUIRE(list.getTail()->jump == list.getTail());
-}
-
-TEST_CASE("Clear function - deallocates all nodes") {
-    LinkedList list;
-    list.insert(10);
-    list.insert(20);
-    list.insert(30);
+    SUBCASE("Out of bounds access") {
+        list.insertAtEnd(1);
+        list.insertAtEnd(2);
+        CHECK(list.getValueAt(10) == -1);
+        CHECK(list.getValueAt(-1) == -1);
+    }
     
-    REQUIRE(list.getSize() == 3);
-    
-    list.clear();
-    
-    REQUIRE(list.getSize() == 0);
-    REQUIRE(list.getHead() == nullptr);
-    REQUIRE(list.getTail() == nullptr);
+    SUBCASE("Delete out of bounds") {
+        list.insertAtEnd(1);
+        list.insertAtEnd(2);
+        int sizeBefore = list.getSize();
+        list.deleteNodeNumber(10); 
+        CHECK(list.getSize() == sizeBefore); 
+    }
 }
